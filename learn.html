@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quantify – Learn</title>
+  <link rel="stylesheet" href="../style.css"/>
+</head>
+
+  
+<body>
+  <header>
+    <h1>Quantify</h1>
+    <p>Flashcards: Core Quant & Trading Terms</p>
+    <nav class="nav">
+      <a href="../index.html">Home</a>
+      <a aria-current="page" href="./learn.html">Learn</a>
+    </nav>
+  </header>
+
+
+<main class="container">
+    <section class="controls">
+      <input id="search" type="search" placeholder="Search terms (e.g., RSI, volatility)…" />
+      <div class="btn-row">
+        <button id="shuffleBtn" class="btn">Shuffle</button>
+        <button id="resetBtn" class="btn">Reset</button>
+        <label class="toggle">
+          <input id="showAnswers" type="checkbox"/>
+          <span>Show answers first</span>
+        </label>
+      </div>
+    </section>
+
+    <section id="cardGrid" class="card-grid" aria-live="polite"></section>
+  </main>
+
+  <footer>
+    <p>© 2025 Quantify</p>
+  </footer>
+
+  <script src="../script.js"></script>
+  <script>
+
+    const grid = document.getElementById('cardGrid');
+    const search = document.getElementById('search');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const showAnswersToggle = document.getElementById('showAnswers');
+
+    let working = [...window.FLASHCARDS];
+
+    function render(cards) {
+      grid.innerHTML = '';
+      cards.forEach(({ term, definition }) => {
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `Flashcard: ${term}. Click to flip.`);
+
+        const inner = document.createElement('div');
+        inner.className = 'card-inner';
+
+        const front = document.createElement('div');
+        front.className = 'card-face card-front';
+        front.innerHTML = `<h3>${term}</h3>`;
+
+        const back = document.createElement('div');
+        back.className = 'card-face card-back';
+        back.innerHTML = `<h3>${term}</h3><p>${definition}</p>`;
+
+        inner.appendChild(front);
+        inner.appendChild(back);
+        card.appendChild(inner);
+
+        const flip = () => inner.classList.toggle('is-flipped');
+        card.addEventListener('click', flip);
+        card.addEventListener('keypress', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); }});
+
+        // Respect "show answers first"
+        if (showAnswersToggle.checked) inner.classList.add('is-flipped');
+
+        grid.appendChild(card);
+      });
+    }
+
+    function filterCards(q) {
+      const query = q.trim().toLowerCase();
+      working = window.FLASHCARDS.filter(c =>
+        c.term.toLowerCase().includes(query) ||
+        c.definition.toLowerCase().includes(query)
+      );
+      render(working);
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+
+    search.addEventListener('input', (e) => filterCards(e.target.value));
+    shuffleBtn.addEventListener('click', () => { shuffle(working); render(working); });
+    resetBtn.addEventListener('click', () => { search.value = ''; working = [...window.FLASHCARDS]; render(working); });
+    showAnswersToggle.addEventListener('change', () => render(working));
+
+    render(working);
+  </script>
+</body>
+</html>
+
+  
+</body>
